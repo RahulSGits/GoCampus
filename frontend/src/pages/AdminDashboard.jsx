@@ -3,13 +3,13 @@ import Navbar from '../components/Navbar';
 import socket from '../services/socket';
 
 const AdminDashboard = () => {
-  // Mock Data
-  const stats = [
-    { label: 'Total Buses', value: '12', icon: '🚍', color: 'bg-blue-100 text-blue-800' },
-    { label: 'Active Routes', value: '8', icon: '🛣️', color: 'bg-green-100 text-green-800' },
-    { label: 'Registered Drivers', value: '15', icon: '👨‍✈️', color: 'bg-indigo-100 text-indigo-800' },
-    { label: 'Registered Students', value: '1,240', icon: '🎓', color: 'bg-purple-100 text-purple-800' },
-  ];
+  // State
+  const [stats, setStats] = useState([
+    { label: 'Total Buses', value: '...', icon: '🚍', color: 'bg-blue-100 text-blue-800' },
+    { label: 'Active Routes', value: '...', icon: '🛣️', color: 'bg-green-100 text-green-800' },
+    { label: 'Registered Drivers', value: '...', icon: '👨‍✈️', color: 'bg-indigo-100 text-indigo-800' },
+    { label: 'Registered Students', value: '...', icon: '🎓', color: 'bg-purple-100 text-purple-800' },
+  ]);
 
   const [activeDrivers, setActiveDrivers] = useState([]);
   
@@ -21,7 +21,45 @@ const AdminDashboard = () => {
   const [newBus, setNewBus] = useState({ busNumber: '', capacity: '', driverName: '', route: 'Unassigned' });
   const [newRoute, setNewRoute] = useState({ name: '', description: '' });
 
+  // Notifications State
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('info');
+  const [adminNotifications, setAdminNotifications] = useState([]);
+
+  const handleSendAlert = async (e) => {
+    e.preventDefault();
+    if (!alertMessage.trim()) return;
+    
+    try {
+      const res = await fetch('http://localhost:5001/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: alertMessage, type: alertType })
+      });
+      const savedAlert = await res.json();
+      
+      socket.emit('sendAdminAlert', savedAlert);
+      setAlertMessage('');
+      setTimeout(() => alert('Alert broadcasted successfully!'), 100);
+    } catch (err) {
+      console.error('Failed sending alert', err);
+    }
+  };
+
   useEffect(() => {
+    // Analytics Hydration
+    fetch('http://localhost:5001/api/analytics')
+      .then(res => res.json())
+      .then(data => {
+        setStats([
+          { label: 'Total Buses', value: data.totalBuses || 0, icon: '🚍', color: 'bg-blue-100 text-blue-800' },
+          { label: 'Active Routes', value: data.totalRoutes || 0, icon: '🛣️', color: 'bg-green-100 text-green-800' },
+          { label: 'Registered Drivers', value: data.registeredDrivers || 0, icon: '👨‍✈️', color: 'bg-indigo-100 text-indigo-800' },
+          { label: 'Registered Students', value: data.registeredStudents || 0, icon: '🎓', color: 'bg-purple-100 text-purple-800' }
+        ]);
+      })
+      .catch(err => console.error("Analytics Error: ", err));
+
     // Initial Hydration from DataStore
     fetch('http://localhost:5001/api/buses')
       .then(res => res.json())
@@ -54,8 +92,20 @@ const AdminDashboard = () => {
       });
     });
 
+    // Initial Notifications Fetch
+    fetch('http://localhost:5001/api/notifications')
+      .then(res => res.json())
+      .then(data => setAdminNotifications(data))
+      .catch(err => console.error(err));
+
+    const handleAdminAlert = (alert) => {
+      setAdminNotifications(prev => [alert, ...prev]);
+    };
+    socket.on('adminAlert', handleAdminAlert);
+
     return () => {
       socket.off('busUpdate');
+      socket.off('adminAlert', handleAdminAlert);
     }
   }, []);
 
@@ -162,21 +212,47 @@ const AdminDashboard = () => {
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-4">System Alerts</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200">
-                  <span className="text-lg">⚠️</span>
-                  <div>
-                    <p className="text-sm font-bold">Bus UK07-9012 Maintenance</p>
-                    <p className="text-xs text-yellow-700 mt-1">Scheduled for oil change tomorrow.</p>
+              
+              <form onSubmit={handleSendAlert} className="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Broadcast Message</p>
+                <div className="flex flex-col gap-2">
+                  <input 
+                    type="text" 
+                    value={alertMessage}
+                    onChange={(e) => setAlertMessage(e.target.value)}
+                    placeholder="Enter alert message..." 
+                    className="w-full text-sm p-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+                    required
+                  />
+                  <div className="flex gap-2">
+                    <select 
+                      value={alertType} 
+                      onChange={(e) => setAlertType(e.target.value)}
+                      className="text-sm p-2 bg-white border border-gray-200 rounded-lg focus:outline-none"
+                    >
+                      <option value="info">Info</option>
+                      <option value="warning">Warning</option>
+                    </select>
+                    <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-lg transition">
+                      Send Alert
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-blue-50 text-blue-800 rounded-lg border border-blue-200">
-                  <span className="text-lg">ℹ️</span>
-                  <div>
-                    <p className="text-sm font-bold">New Route Configured</p>
-                    <p className="text-xs text-blue-700 mt-1">Route from Raipur has been added.</p>
+              </form>
+
+              <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                {adminNotifications.length === 0 && <p className="text-sm text-gray-500">No active alerts.</p>}
+                {adminNotifications.map((notif, idx) => (
+                  <div key={notif._id || idx} className={`flex items-start gap-3 p-3 rounded-lg border ${notif.type === 'warning' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' : 'bg-blue-50 text-blue-800 border-blue-200'}`}>
+                    <span className="text-lg">{notif.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <div>
+                      <p className="text-sm font-bold">{notif.message}</p>
+                      <p className={`text-xs mt-1 ${notif.type === 'warning' ? 'text-yellow-700' : 'text-blue-700'}`}>
+                        {new Date(notif.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 

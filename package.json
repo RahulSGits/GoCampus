@@ -1,16 +1,16 @@
 {
   "name": "gocampus",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "GoCampus Full Stack App Deployment",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cd backend && npm start",
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build",
+    "heroku-postbuild": "npm run install-frontend && npm run build-frontend",
+    "postinstall": "npm run install-backend && npm run install-frontend"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "express": "^5.2.1"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

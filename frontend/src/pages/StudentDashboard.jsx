@@ -6,6 +6,30 @@ import socket from '../services/socket';
 const StudentDashboard = () => {
   const [activeBuses, setActiveBuses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+
+  // GEU Campus Coordinates
+  const CAMPUS_LAT = 30.2686;
+  const CAMPUS_LNG = 78.0019;
+
+  // Haversine ETA Calculation
+  const calculateETA = (lat, lng) => {
+    if (!lat || !lng) return '--';
+    const R = 6371; // Earth's radius in km
+    const dLat = (CAMPUS_LAT - lat) * (Math.PI / 180);
+    const dLng = (CAMPUS_LNG - lng) * (Math.PI / 180);
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat * (Math.PI / 180)) * Math.cos(CAMPUS_LAT * (Math.PI / 180)) * 
+      Math.sin(dLng / 2) * Math.sin(dLng / 2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+    const distanceKm = R * c; 
+    
+    // Assume average city speed 20km/h
+    const timeHours = distanceKm / 20;
+    const timeMinutes = Math.round(timeHours * 60);
+    return timeMinutes <= 1 ? 'Arriving' : `${timeMinutes} min`;
+  };
 
   useEffect(() => {
     const fetchBuses = async () => {
@@ -33,9 +57,19 @@ const StudentDashboard = () => {
     };
     
     fetchBuses();
+
+    // Fetch Persistent Notifications
+    fetch('http://localhost:5001/api/notifications')
+      .then(res => res.json())
+      .then(data => setNotifications(data))
+      .catch(err => console.error(err));
     
-    // Listen for live GPS streams from drivers
-    socket.on('busUpdate', (updatedBus) => {
+    // Listen for live Admin Notifications
+    const handleAdminAlert = (alert) => {
+      setNotifications(prev => [alert, ...prev]);
+    };
+    
+    const handleBusUpdate = (updatedBus) => {
       setActiveBuses(prevBuses => {
         const exists = prevBuses.find(b => b.id === updatedBus.id);
         if (exists) {
@@ -49,10 +83,14 @@ const StudentDashboard = () => {
           return [...prevBuses, updatedBus];
         }
       });
-    });
+    };
+
+    socket.on('busUpdate', handleBusUpdate);
+    socket.on('adminAlert', handleAdminAlert);
 
     return () => {
-       socket.off('busUpdate');
+       socket.off('busUpdate', handleBusUpdate);
+       socket.off('adminAlert', handleAdminAlert);
     };
   }, []);
 
@@ -102,7 +140,12 @@ const StudentDashboard = () => {
                           {bus.seats !== undefined ? `${bus.seats} Seats Left` : '--'}
                         </span>
                       </div>
-                      <p className="text-xs font-medium text-gray-500 flex items-center gap-1">📍 {bus.route || 'Unassigned Route'}</p>
+                      <div className="flex justify-between items-center w-full">
+                        <p className="text-xs font-medium text-gray-500 flex items-center gap-1">📍 {bus.route || 'Unassigned Route'}</p>
+                        <p className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                          ETA: {calculateETA(bus.lat, bus.lng)}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -150,15 +193,16 @@ const StudentDashboard = () => {
             <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
               📣 Admin Notifications
             </h3>
-            <div className="space-y-4">
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                <p className="text-sm text-blue-800 font-medium">Bus UK07-1234 has departed from ISBT.</p>
-                <p className="text-xs text-blue-600 mt-1">10 mins ago</p>
-              </div>
-              <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
-                <p className="text-sm text-gray-700 font-medium">Welcome to the new GoCampus tracking system!</p>
-                <p className="text-xs text-gray-500 mt-1">1 hr ago</p>
-              </div>
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              {notifications.length === 0 && <p className="text-sm text-gray-500">No active alerts.</p>}
+              {notifications.map((notif, idx) => (
+                <div key={notif._id || idx} className={`p-3 rounded border-l-4 ${notif.type === 'warning' ? 'bg-yellow-50 border-yellow-500' : 'bg-blue-50 border-blue-500'}`}>
+                  <p className={`text-sm font-medium ${notif.type === 'warning' ? 'text-yellow-800' : 'text-blue-800'}`}>{notif.message}</p>
+                  <p className={`text-xs mt-1 ${notif.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'}`}>
+                    {notif.createdAt ? new Date(notif.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown Time'}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

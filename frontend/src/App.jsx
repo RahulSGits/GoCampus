@@ -19,20 +19,20 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
           <Route path="/student" element={
             <ProtectedRoute allowedRoles={['student']}>
-               <StudentDashboard />
+              <StudentDashboard />
             </ProtectedRoute>
           } />
           <Route path="/driver" element={
             <ProtectedRoute allowedRoles={['driver']}>
-               <DriverDashboard />
+              <DriverDashboard />
             </ProtectedRoute>
           } />
           <Route path="/admin" element={
             <ProtectedRoute allowedRoles={['admin']}>
-               <AdminDashboard />
+              <AdminDashboard />
             </ProtectedRoute>
           } />
           {/* Fallback routing */}

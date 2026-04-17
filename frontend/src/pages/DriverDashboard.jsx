@@ -6,6 +6,7 @@ const DriverDashboard = () => {
   const { user } = useContext(AuthContext);
   const [availableSeats, setAvailableSeats] = useState(38);
   const [lastUpdated, setLastUpdated] = useState('just now');
+  const [notifications, setNotifications] = useState([]);
   const seatsRef = React.useRef(availableSeats);
 
   useEffect(() => {
@@ -28,8 +29,24 @@ const DriverDashboard = () => {
          seats: seatsRef.current
        });
     }, 3000);
+
+    // Fetch Persistent Notifications
+    fetch('http://localhost:5001/api/notifications')
+      .then(res => res.json())
+      .then(data => setNotifications(data))
+      .catch(err => console.error(err));
     
-    return () => clearInterval(driveInterval);
+    // Listen for live Admin Notifications
+    const handleAdminAlert = (alert) => {
+      setNotifications(prev => [alert, ...prev]);
+    };
+    
+    socket.on('adminAlert', handleAdminAlert);
+
+    return () => {
+      clearInterval(driveInterval);
+      socket.off('adminAlert', handleAdminAlert);
+    }
   }, []);
 
   const handleDecrease = () => {
@@ -109,14 +126,15 @@ const DriverDashboard = () => {
             <span>📣</span> Admin Notifications
           </h3>
           <div className="space-y-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-lg">
-              <p className="text-sm text-blue-900 font-medium">Route diversion ahead near Clock Tower due to construction.</p>
-              <p className="text-xs text-blue-600 mt-1">10 min ago</p>
-            </div>
-            <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded-lg">
-              <p className="text-sm text-green-900 font-medium">Maintenance approved for Bus UK07-1234. Please report to depot after shift.</p>
-              <p className="text-xs text-green-600 mt-1">2 hrs ago</p>
-            </div>
+            {notifications.length === 0 && <p className="text-sm text-gray-500">No active alerts.</p>}
+            {notifications.map((notif, idx) => (
+              <div key={notif._id || idx} className={`p-3 rounded-lg border-l-4 ${notif.type === 'warning' ? 'bg-yellow-50 border-yellow-500' : 'bg-blue-50 border-blue-500'}`}>
+                <p className={`text-sm font-medium ${notif.type === 'warning' ? 'text-yellow-900' : 'text-blue-900'}`}>{notif.message}</p>
+                <p className={`text-xs mt-1 ${notif.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'}`}>
+                  {notif.createdAt ? new Date(notif.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown Time'}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
