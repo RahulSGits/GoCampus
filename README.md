@@ -60,23 +60,14 @@ Follow these instructions to run the application locally.
     npm install
     ```
 
-3.  **Environment Setup**
-    Ensure your `.env` file inside the `backend` directory is configured:
-    ```env
-    PORT=5001
-    NODE_ENV=development
-    MONGO_URI=mongodb://localhost:27017/gocampus
-    JWT_SECRET=your_super_secret_key
-    ```
-
-4.  **Seed the Database** (Optional but recommended for testing)
+3.  **Seed the Database** (Optional but recommended for testing)
     This will generate test accounts and initial bus routes.
     ```bash
     cd backend
     npm run seed
     ```
 
-5.  **Run the Application**
+4.  **Run the Application**
     Open two terminals and start both servers concurrently.
     
     **Terminal 1 (Backend):**
