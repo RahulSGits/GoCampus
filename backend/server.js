@@ -55,5 +55,6 @@ require('./sockets/socketHandler')(io);
 // Start Server
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
+  // Log successful server initialization
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
