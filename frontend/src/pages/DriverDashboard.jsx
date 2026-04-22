@@ -7,6 +7,7 @@ const DriverDashboard = () => {
   const [availableSeats, setAvailableSeats] = useState(38);
   const [lastUpdated, setLastUpdated] = useState('just now');
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const seatsRef = React.useRef(availableSeats);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ const DriverDashboard = () => {
     // Listen for live Admin Notifications
     const handleAdminAlert = (alert) => {
       setNotifications(prev => [alert, ...prev]);
+      setUnreadCount(prev => prev + 1);
     };
     
     socket.on('adminAlert', handleAdminAlert);
@@ -85,19 +87,39 @@ const DriverDashboard = () => {
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Driver Console</h1>
           <p className="text-gray-500 font-medium mt-1">Update your bus status below</p>
         </div>
-        
-        <button className="bg-white p-3 rounded-full shadow-sm border border-gray-100 text-red-500 hover:bg-red-50 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Notification Bell */}
+          <button 
+            onClick={() => {
+              setUnreadCount(0);
+              document.getElementById('driver-notifications')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="relative bg-white p-3 rounded-full shadow-sm border border-gray-100 text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1.5 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            )}
+          </button>
+          
+          <button className="bg-white p-3 rounded-full shadow-sm border border-gray-100 text-red-500 hover:bg-red-50 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Main Center Content */}
       <div className="flex-1 z-10 flex flex-col items-center justify-center p-6">
         <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Available Seats</h2>
         
-        <div className="text-[12rem] font-black text-[#1d2b36] leading-none tracking-tighter mb-8">
+        <div className="text-7xl md:text-[12rem] font-black text-[#1d2b36] leading-none tracking-tighter mb-8">
           {availableSeats}
         </div>
 
@@ -120,7 +142,7 @@ const DriverDashboard = () => {
       </div>
 
       {/* Admin Notifications Section */}
-      <div className="z-10 absolute bottom-6 left-6 right-6 md:right-auto md:w-96">
+      <div id="driver-notifications" className="z-10 relative md:absolute bottom-0 md:bottom-6 left-0 md:left-6 right-0 p-6 md:p-0 md:right-auto md:w-96">
         <div className="bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg rounded-2xl p-5">
           <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
             <span>📣</span> Admin Notifications

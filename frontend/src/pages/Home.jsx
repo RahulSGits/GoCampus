@@ -28,24 +28,24 @@ const Home = () => {
         <div className="absolute top-20 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-40 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
-        <div className="max-w-4xl w-full text-center space-y-8 relative z-10 transition-all duration-1000 transform translate-y-0 opacity-100">
-          <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-bold tracking-wider mb-4 animate-bounce">
+        <div className="max-w-4xl w-full text-center space-y-6 md:space-y-8 relative z-10 transition-all duration-1000 transform translate-y-0 opacity-100 px-4">
+          <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-xs md:text-sm font-bold tracking-wider mb-2 md:mb-4 animate-bounce">
             🚀 NEXT-GEN TRANSIT
           </span>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900 tracking-tight drop-shadow-sm">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-900 tracking-tight drop-shadow-sm leading-tight">
             Smart University <br/> <span className="text-blue-600">Bus Tracking</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-medium leading-relaxed">
             Never miss your campus bus again. Track routes in real-time, get exact arrival estimates, and plan your daily campus travel seamlessly.
           </p>
-          <div className="flex justify-center gap-5 pt-6">
-            <Link to="/register" className="group relative px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-xl shadow-blue-500/30 hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 overflow-hidden">
-              <span className="relative z-10 flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 md:pt-6">
+            <Link to="/register" className="w-full sm:w-auto group relative px-8 py-3 md:py-4 bg-blue-600 text-white rounded-xl font-bold text-base md:text-lg shadow-xl shadow-blue-500/30 hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 overflow-hidden">
+              <span className="relative z-10 flex items-center justify-center gap-2">
                 Get Started <span className="group-hover:translate-x-1 transition-transform">→</span>
               </span>
               <div className="absolute inset-0 h-full w-full scale-0 rounded-xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/20"></div>
             </Link>
-            <Link to="/login" className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-800 border-2 border-gray-200 rounded-xl font-bold text-lg shadow-sm hover:border-blue-500 hover:text-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
+            <Link to="/login" className="w-full sm:w-auto px-8 py-3 md:py-4 bg-white/80 backdrop-blur-sm text-gray-800 border-2 border-gray-200 rounded-xl font-bold text-base md:text-lg shadow-sm hover:border-blue-500 hover:text-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
               Dashboard Login
             </Link>
           </div>
