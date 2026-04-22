@@ -7,6 +7,7 @@ const StudentDashboard = () => {
   const [activeBuses, setActiveBuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // GEU Campus Coordinates
   const CAMPUS_LAT = 30.2686;
@@ -67,6 +68,7 @@ const StudentDashboard = () => {
     // Listen for live Admin Notifications
     const handleAdminAlert = (alert) => {
       setNotifications(prev => [alert, ...prev]);
+      setUnreadCount(prev => prev + 1);
     };
     
     const handleBusUpdate = (updatedBus) => {
@@ -96,9 +98,17 @@ const StudentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar role="Student" userName="Student User" />
+      <Navbar 
+        role="Student" 
+        userName="Student User" 
+        unreadCount={unreadCount} 
+        onNotificationClick={() => {
+          setUnreadCount(0);
+          document.getElementById('notifications-section')?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
       
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 flex flex-col lg:flex-row gap-6">
         
         {/* Main Tracking Area */}
         <div className="flex-1 flex flex-col gap-4">
@@ -114,7 +124,7 @@ const StudentDashboard = () => {
             </div>
           </div>
           
-          <div className="flex-1 bg-white rounded-xl shadow-sm border overflow-hidden relative" style={{ minHeight: '500px' }}>
+          <div className="flex-1 bg-white rounded-xl shadow-sm border overflow-hidden relative min-h-[350px] lg:min-h-[500px]">
             {/* Embedded MapView */}
             <MapView buses={activeBuses} />
           </div>
@@ -189,7 +199,7 @@ const StudentDashboard = () => {
           </div>
 
           {/* Notifications */}
-          <div className="bg-white p-5 rounded-xl shadow-sm border flex-1">
+          <div id="notifications-section" className="bg-white p-5 rounded-xl shadow-sm border flex-1">
             <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
               📣 Admin Notifications
             </h3>

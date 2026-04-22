@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('info');
   const [adminNotifications, setAdminNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleSendAlert = async (e) => {
     e.preventDefault();
@@ -100,6 +101,7 @@ const AdminDashboard = () => {
 
     const handleAdminAlert = (alert) => {
       setAdminNotifications(prev => [alert, ...prev]);
+      setUnreadCount(prev => prev + 1);
     };
     socket.on('adminAlert', handleAdminAlert);
 
@@ -111,7 +113,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Navbar role="Admin" userName="System Admin" />
+      <Navbar 
+        role="Admin" 
+        userName="System Admin" 
+        unreadCount={unreadCount} 
+        onNotificationClick={() => {
+          setUnreadCount(0);
+          document.getElementById('admin-alerts')?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Options */}
@@ -210,7 +220,7 @@ const AdminDashboard = () => {
 
           {/* Quick Actions & System Health */}
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div id="admin-alerts" className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-4">System Alerts</h3>
               
               <form onSubmit={handleSendAlert} className="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
