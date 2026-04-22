@@ -12,6 +12,7 @@ import DriverDashboard from './pages/DriverDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
+  // Main application routing and context providers
   return (
     <AuthProvider>
       <BrowserRouter>
