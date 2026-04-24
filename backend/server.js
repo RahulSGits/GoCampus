@@ -5,6 +5,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
 
 // Load env
 dotenv.config();
@@ -27,6 +31,23 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Security Middleware
+// Set security headers (CSP disabled to allow React frontend to load assets easily)
+app.use(helmet({ contentSecurityPolicy: false })); 
+
+// Prevent NoSQL injection
+app.use(mongoSanitize()); 
+
+// Rate limiting (100 requests per 10 minutes)
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, 
+  max: 100 
+});
+app.use('/api', limiter);
+
+// Prevent HTTP Parameter Pollution
+app.use(hpp());
 
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
