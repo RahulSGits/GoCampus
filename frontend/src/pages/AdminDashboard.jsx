@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     if (!alertMessage.trim()) return;
     
     try {
-      const res = await fetch('http://localhost:5001/api/notifications', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/notifications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: alertMessage, type: alertType })
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Analytics Hydration
-    fetch('http://localhost:5001/api/analytics')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/analytics`)
       .then(res => res.json())
       .then(data => {
         setStats([
@@ -62,7 +62,7 @@ const AdminDashboard = () => {
       .catch(err => console.error("Analytics Error: ", err));
 
     // Initial Hydration from DataStore
-    fetch('http://localhost:5001/api/buses')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/buses`)
       .then(res => res.json())
       .then(data => {
         const tableData = data.map((bus) => ({
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
     });
 
     // Initial Notifications Fetch
-    fetch('http://localhost:5001/api/notifications')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/notifications`)
       .then(res => res.json())
       .then(data => setAdminNotifications(data))
       .catch(err => console.error(err));
@@ -299,7 +299,7 @@ const AdminDashboard = () => {
             <form onSubmit={async (e) => {
               e.preventDefault();
               try {
-                const res = await fetch('http://localhost:5001/api/buses', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/buses`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(newBus)
@@ -332,7 +332,7 @@ const AdminDashboard = () => {
             <form onSubmit={async (e) => {
               e.preventDefault();
               try {
-                const res = await fetch('http://localhost:5001/api/routes', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/routes`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(newRoute)

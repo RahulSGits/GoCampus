@@ -35,7 +35,7 @@ const StudentDashboard = () => {
   useEffect(() => {
     const fetchBuses = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/buses');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/buses`);
         const data = await response.json();
         
         const mapData = data
@@ -60,7 +60,7 @@ const StudentDashboard = () => {
     fetchBuses();
 
     // Fetch Persistent Notifications
-    fetch('http://localhost:5001/api/notifications')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/notifications`)
       .then(res => res.json())
       .then(data => setNotifications(data))
       .catch(err => console.error(err));
