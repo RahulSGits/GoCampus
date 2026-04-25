@@ -32,7 +32,7 @@ const DriverDashboard = () => {
     }, 3000);
 
     // Fetch Persistent Notifications
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/notifications`)
+    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5001' : '')}/api/notifications`)
       .then(res => res.json())
       .then(data => setNotifications(data))
       .catch(err => console.error(err));
