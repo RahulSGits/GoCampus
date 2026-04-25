@@ -56,6 +56,29 @@ app.use('/api/routes', require('./routes/routeRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/analytics', require('./routes/analytics'));
 
+// Temporary endpoint to seed database
+app.get('/api/seed', async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const User = require('./models/User');
+    const Bus = require('./models/Bus');
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash('123456', salt);
+
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      await User.insertMany([
+        { name: 'Admin User', email: 'admin@gocampus.com', password, role: 'admin' },
+        { name: 'Driver User', email: 'driver@gocampus.com', password, role: 'driver' },
+        { name: 'Student User', email: 'student@gocampus.com', password, role: 'student' }
+      ]);
+    }
+    res.send('<h1>Database Seeding Completed!</h1><p>You can now go back to the login page and log in as admin@gocampus.com with password 123456.</p>');
+  } catch (err) {
+    res.status(500).send('Error seeding database: ' + err.message);
+  }
+});
+
 // Serve Frontend
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/dist')));
