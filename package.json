@@ -5,7 +5,7 @@
   "scripts": {
     "start": "cd backend && npm start",
     "install-backend": "cd backend && npm install",
-    "install-frontend": "cd frontend && npm install",
+    "install-frontend": "cd frontend && npm install --include=dev",
     "build-frontend": "cd frontend && npm run build",
     "build": "npm run build-frontend",
     "heroku-postbuild": "npm run install-frontend && npm run build-frontend",
